@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.env
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# VS Code
+.vscode/
+settings.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Credentials
+*.json
+credentials/
+
+# Data files (optional)
+*.csv
+*.parquet
+
+# Logs
+*.log
+.user.*

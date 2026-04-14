@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw_source 
+    database: air_quality_db
+    schema: air_quality_db
+    tables:
+      - name: raw_stations
+        description: "Raw station data loaded from IRCELINE API"
+        columns:
+          - name: station_id
+            tests:
+              - unique
+              - not_null
+      - name: raw_timeseries
+        description: "Raw timeseries data loaded from IRCELINE API"
+      - name: raw_measurements
+        description: "Raw pollution measurements"

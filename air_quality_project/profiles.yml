@@ -1,0 +1,12 @@
+air_quality_project:
+  target: dev
+  outputs:
+    dev:
+      type: mysql5
+      server: localhost
+      port: 3306
+      database: air_quality_db
+      schema: air_quality_db
+      username: root
+      password: ""
+      threads: 4
