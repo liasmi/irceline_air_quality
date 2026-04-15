@@ -18,6 +18,9 @@ class IRCELINEClient:
     def get_stations(self):
         return self._get("/stations")
 
+    def get_phenomena(self):
+        return self._get("/phenomena")
+
     def get_timeseries(self):
         return self._get("/timeseries")
 

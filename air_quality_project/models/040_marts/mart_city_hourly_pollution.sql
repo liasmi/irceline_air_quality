@@ -6,6 +6,6 @@ SELECT
     AVG(measurement_value) AS avg_hourly_value,
     unit,
     COUNT(*) AS reading_count
-FROM {{ ref('int_station_measurements') }}
+FROM {{ ref('int_station_measurements_vl') }}
 GROUP BY 1, 2, 3, 4, 6
 ORDER BY measured_at_date DESC, measured_hour DESC

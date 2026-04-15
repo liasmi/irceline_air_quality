@@ -16,3 +16,5 @@ sources:
         description: "Raw timeseries data loaded from IRCELINE API"
       - name: raw_measurements
         description: "Raw pollution measurements"
+      - name: raw_phenomena
+        description: "Raw phenomena metadata"

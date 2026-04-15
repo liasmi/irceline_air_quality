@@ -2,6 +2,7 @@ from ingestion.stations import fetch_stations
 from ingestion.timeseries_meta import fetch_timeseries
 from ingestion.measurements import fetch_measurements
 from ingestion.loaders.mysql_loader import load_to_mysql
+from ingestion.phenomena import fetch_phenomena
 from ingestion.api_client import IRCELINEClient
 
 
@@ -11,13 +12,18 @@ def run():
     stations = fetch_stations()
     load_to_mysql(stations, "raw_stations")
 
+    print("Phenomena...")
+    phenomena = fetch_phenomena()
+    load_to_mysql(phenomena, "raw_phenomena")
+    
+
     print("Timeseries...")
-    # Pass station_ids to fetch only Flanders timeseries
-    ts = fetch_timeseries(station_ids=stations["station_id"].tolist())
+    ts = fetch_timeseries()
     load_to_mysql(ts, "raw_timeseries")
 
     print("Measurements...")
-    measurements = fetch_measurements(ts["timeseries_id"].tolist(), phenomenon_ids=ts["phenomenon_id"].unique().tolist())
+    timeseries_phenomena = ts.set_index("timeseries_id")["phenomenon_id"].to_dict()
+    measurements = fetch_measurements(timeseries_phenomena)
     print(f"   Fetched {len(measurements)} measurement records")
     print(f"   Shape: {measurements.shape}")
     if not measurements.empty:

@@ -3,7 +3,7 @@ import time
 from ingestion.api_client import IRCELINEClient
 from ingestion.config import pipeline_config
 
-def fetch_timeseries(station_ids=None):
+def fetch_timeseries():
     """Fetch timeseries metadata.
     
     Args:
@@ -22,15 +22,10 @@ def fetch_timeseries(station_ids=None):
         phenomenon = detail["parameters"]["phenomenon"]
         phenomenon_id = phenomenon["id"]
 
-        if phenomenon_id not in pipeline_config.target_phenomena_ids:
-            continue
 
         station = detail["station"]["properties"]
         station_id = station["id"]
         
-        # Filter by station_ids if provided (Flanders stations)
-        if station_ids and station_id not in station_ids:
-            continue
 
         records.append({
             "timeseries_id": ts_id,

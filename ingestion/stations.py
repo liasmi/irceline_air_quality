@@ -14,9 +14,6 @@ def fetch_stations():
         coords = s["geometry"]["coordinates"]
         lon, lat = coords[0], coords[1]
 
-        if not is_in_flanders(lon, lat, pipeline_config.flanders_bbox):
-            continue
-
         records.append({
             "station_id": s["properties"]["id"],
             "station_label": s["properties"]["label"],
