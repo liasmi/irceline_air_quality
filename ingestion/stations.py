@@ -1,6 +1,5 @@
 import pandas as pd
 from ingestion.api_client import IRCELINEClient
-from ingestion.utils.is_in_flanders import is_in_flanders
 from ingestion.config import pipeline_config
 
 def fetch_stations():
