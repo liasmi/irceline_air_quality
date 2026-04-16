@@ -43,3 +43,8 @@ models:
       +materialized: table
       +database: air_quality_db
       +schema: mart
+    050_consumption:
+      +materialized: table
+      +database: air_quality_db
+      +schema: consumption
+      +tags: ['consumption_polluting_cities']
