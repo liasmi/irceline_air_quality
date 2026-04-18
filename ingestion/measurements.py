@@ -9,14 +9,15 @@ def build_timespan(days=30):
     return "2026-01-01T00:00:00Z/2026-01-02T00:00:00Z"
 
 
-def fetch_measurements(timeseries_phenomena):
+def fetch_measurements(timeseries_phenomena,timespan=None):
     """Fetch measurements data for given timeseries-phenomenon pairs.
     
     Args:
         timeseries_phenomena: Dict of {timeseries_id: phenomenon_id} to fetch
+        timespan: The timespan for which to fetch data
     """
     client = IRCELINEClient()
-    timespan = build_timespan()
+    # timespan = build_timespan()
 
     records = []
 

@@ -1,12 +1,9 @@
-{{ config(
-    materialized='incremental',
-    unique_key='measurement_id'
-) }}
+{{ config(materialized='table') }}
 
 SELECT
-    CONCAT(m.timeseries_id, '_', m.measured_at_timestamp) AS measurement_id,
+    CONCAT(m.timeseries_id, '_', m.timestamp) AS measurement_id,
 
-    m.measured_at_timestamp,
+    m.timestamp,
     t.station_id,
     t.phenomenon_id,
 
@@ -23,8 +20,3 @@ JOIN {{ ref('stg_stations') }} s
 JOIN {{ ref('dim_pollutant') }} p
     ON t.phenomenon_id = p.phenomenon_id
 
-{% if is_incremental() %}
-WHERE m.measured_at_timestamp > (
-    SELECT MAX(measured_at_timestamp) FROM {{ this }}
-)
-{% endif %}

@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: stg_measurements
+    description: "Staging model for measurement data, with cleaned and typed columns"
+    columns:
+      - name: phenomenon_id
+        description: "Identifier for the phenomenon being measured"
+        tests:
+          - not_null
+      - name: timeseries_id
+        description: "Identifier for the timeseries"
+        tests:
+          - not_null
+      - name: measurement_value
+        description: "The measured value"
+        tests:
+          - not_null
+        severity: warn
+      - name: timestamp
+        description: "The timestamp of the measurement"
+        tests:
+          - not_null
+        severity: warn

@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: stg_timeseries
+    description: "Staging model for timeseries data, with cleaned and typed columns"
+    columns:
+      - name: timeseries_id
+        description: "Unique identifier for each timeseries"
+        tests:
+          - unique
+          - not_null
+      - name: station_id
+        description: "Identifier for the station"
+        tests:
+          - not_null
+      - name: phenomenon_id
+        description: "Identifier for the phenomenon"
+        tests:
+          - not_null

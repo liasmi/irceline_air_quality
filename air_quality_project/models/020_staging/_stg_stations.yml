@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: stg_stations
+    description: "Staging model for station data, with cleaned and typed columns"
+    columns:
+      - name: station_id
+        description: "Unique identifier for each station"
+        tests:
+          - unique
+          - not_null
+      - name: station_name
+        description: "Name of the station"
+      - name: latitude
+        description: "Latitude of the station"
+      - name: longitude
+        description: "Longitude of the station"

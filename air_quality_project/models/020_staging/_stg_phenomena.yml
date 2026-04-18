@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: stg_phenomena
+    description: "Staging model for phenomena metadata, with cleaned and typed columns"
+    columns:
+      - name: phenomenon_id
+        description: "Unique identifier for each phenomenon"
+        tests:
+          - unique
+          - not_null
+      - name: phenomenon_name
+        description: "Name of the phenomenon"
+      - name: abbreviation
+        description: "Abbreviation for the phenomenon"
