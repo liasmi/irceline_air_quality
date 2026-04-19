@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
+import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 from ingestion.orchestration import run as run_ingestion_pipeline
 
+logger = logging.getLogger(__name__)
 
 def resolve_timespan(dag_run=None):
     if dag_run and getattr(dag_run, "conf", None):
@@ -20,6 +22,7 @@ def resolve_timespan(dag_run=None):
 
 def execute_ingestion(dag_run=None):
     timespan = resolve_timespan(dag_run=dag_run)
+    logger.info(f"Executing ingestion with timespan: {timespan}")
     print(f"Using timespan: {timespan}")
     run_ingestion_pipeline(timespan=timespan)
 

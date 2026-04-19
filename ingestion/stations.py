@@ -1,9 +1,13 @@
 import pandas as pd
+import logging
 from ingestion.api_client import IRCELINEClient
 from ingestion.config import pipeline_config
 
+logger = logging.getLogger(__name__)
+
 def fetch_stations():
 
+    logger.info("Fetching stations from API")
     client = IRCELINEClient()
     stations = client.get_stations()
 
@@ -20,4 +24,6 @@ def fetch_stations():
             "latitude": lat
         })
 
-    return pd.DataFrame(records)
+    df = pd.DataFrame(records)
+    logger.info(f"Processed {len(records)} stations")
+    return df

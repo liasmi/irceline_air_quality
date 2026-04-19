@@ -1,3 +1,4 @@
+import logging
 from ingestion.stations import fetch_stations
 from ingestion.timeseries_meta import fetch_timeseries
 from ingestion.measurements import fetch_measurements
@@ -5,9 +6,12 @@ from ingestion.loaders.mysql_loader import load_to_mysql
 from ingestion.phenomena import fetch_phenomena
 from ingestion.api_client import IRCELINEClient
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-def run():
+def run(timespan=None):
 
+    logger.info("Starting ingestion pipeline")
     print("Stations...")
     stations = fetch_stations()
     load_to_mysql(stations, "raw_stations")
@@ -22,7 +26,8 @@ def run():
     load_to_mysql(ts, "raw_timeseries")
 
     print("Measurements...")
-    timespan = "2026-01-01T00:00:00Z/2026-01-31T00:00:00Z"
+    if timespan is None:
+        timespan = "2026-01-01T00:00:00Z/2026-01-03T00:00:00Z"
     timeseries_phenomena = ts.set_index("timeseries_id")["phenomenon_id"].to_dict()
     measurements = fetch_measurements(timeseries_phenomena, timespan=timespan)
     print(f"   Fetched {len(measurements)} measurement records")
@@ -31,6 +36,7 @@ def run():
         print(f"   Columns: {measurements.columns.tolist()}")
     load_to_mysql(measurements, "raw_measurements")
 
+    logger.info("Ingestion pipeline completed successfully")
     print("DONE")
 
 if __name__ == "__main__":

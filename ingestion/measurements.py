@@ -1,6 +1,9 @@
 import pandas as pd
+import logging
 from datetime import datetime, timedelta
 from ingestion.api_client import IRCELINEClient
+
+logger = logging.getLogger(__name__)
 
 def build_timespan(days=30):
     end = datetime.utcnow()
@@ -16,12 +19,14 @@ def fetch_measurements(timeseries_phenomena,timespan=None):
         timeseries_phenomena: Dict of {timeseries_id: phenomenon_id} to fetch
         timespan: The timespan for which to fetch data
     """
+    logger.info(f"Fetching measurements for {len(timeseries_phenomena)} timeseries with timespan {timespan}")
     client = IRCELINEClient()
     # timespan = build_timespan()
 
     records = []
 
     for ts_id, pid in timeseries_phenomena.items():
+        logger.debug(f"Fetching data for timeseries {ts_id}")
         data = client.get_timeseries_data(ts_id, timespan, phenomenon_id=pid)
 
         # API returns values as list of dicts: [{'timestamp': ms, 'value': float}, ...]
@@ -35,4 +40,6 @@ def fetch_measurements(timeseries_phenomena,timespan=None):
                 "value": v["value"]
             })
 
-    return pd.DataFrame(records)
+    df = pd.DataFrame(records)
+    logger.info(f"Fetched {len(records)} measurement records")
+    return df

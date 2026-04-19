@@ -1,7 +1,10 @@
 import pandas as pd
 import time
+import logging
 from ingestion.api_client import IRCELINEClient
 from ingestion.config import pipeline_config
+
+logger = logging.getLogger(__name__)
 
 def fetch_timeseries():
     """Fetch timeseries metadata.
@@ -9,6 +12,7 @@ def fetch_timeseries():
     Args:
         station_ids: Optional list of station IDs to filter by (Flanders stations)
     """
+    logger.info("Fetching timeseries metadata")
     client = IRCELINEClient()
     ts_list = client.get_timeseries()
 
@@ -16,6 +20,7 @@ def fetch_timeseries():
 
     for ts in ts_list:
         ts_id = ts["id"]
+        logger.debug(f"Processing timeseries {ts_id}")
 
         detail = client.get_timeseries_metadata(ts_id)
 
@@ -37,4 +42,6 @@ def fetch_timeseries():
 
         time.sleep(0.2)
 
-    return pd.DataFrame(records)
+    df = pd.DataFrame(records)
+    logger.info(f"Processed {len(records)} timeseries")
+    return df

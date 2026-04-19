@@ -1,10 +1,14 @@
 import requests
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 URL = "https://geo.irceline.be/sos/api/v1/phenomena"
 
 
 def fetch_phenomena():
+    logger.info("Fetching phenomena from API")
     data = requests.get(URL).json()
 
     records = []
@@ -15,5 +19,7 @@ def fetch_phenomena():
             "label": p.get("label")
         })
 
-    return pd.DataFrame(records)
+    df = pd.DataFrame(records)
+    logger.info(f"Processed {len(records)} phenomena")
+    return df
 

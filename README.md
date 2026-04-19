@@ -2,41 +2,155 @@
 
 ## Overview
 
-This repository collects IRCELINE air quality data, loads it into MySQL, and provides analysis assets and a DBT project for modeling.
+This repository collects IRCELINE air quality data, loads it into MySQL, and provides a DBT project for modeling and business consumption.
 
-Key components:
-- `ingestion/`: Python extraction and loading pipeline
+The project includes:
+- `ingestion/`: Python extraction and MySQL loading pipeline
 - `ingestion/dags/`: Airflow DAG for orchestration
-- `air_quality_project/`: DBT project for modeling and marts
-- `analysis/deep_analysis.ipynb`: exploratory notebook for pollution analysis
-- `.env`: local database and environment configuration
+- `air_quality_project/`: DBT project with staging, dimensional marts, and consumption tables
+- `analysis/`: notebook-based analysis and generated charts
+- `airflow_home/`: Airflow runtime environment and logs
+- `logs/`: pipeline logs
+
+## IRCELINE APIs
+
+The ingestion pipeline calls the IRCELINE Sensor Observation Service (SOS) API at `https://geo.irceline.be/sos/api/v1`.
+
+Main endpoints used:
+- `/stations` for station metadata
+- `/phenomena` for pollutant and phenomenon definitions
+- `/timeseries` for timeseries metadata
+- `/timeseries/{timeseries_id}` for single timeseries metadata
+- `/timeseries/{timeseries_id}/getData` for timeseries observations
+  - query parameters: `timespan`, and optional `phenomenon`
+
+API documentation:
+- https://geo.irceline.be/sos/static/doc/api-doc/index.html
+
+## What was analyzed
+
+The notebook `analysis/deep_analysis.ipynb` was used to explore air quality data and generate chart artifacts for:
+- station coverage and monitoring distribution
+- polluted city ranking in Flanders
+- hourly pollution profiles for Antwerpen and Steenokkerzeel
+- city pollution profiles for Antwerpen, Steenokkerzeel, and Vilvoorde
+
+### Generated charts and reports
+
+- `analysis/monitoring_stations_distribution.html`
+- `analysis/polluted_cities_flanders.html`
+- `analysis/polluted_cities_flanders_bar2.html`
+- `analysis/Antwerpen_hourly_pollution_2026-01-01.html`
+- `analysis/Steenokkerzeel_hourly_pollution_2026-01-01.html`
+- `analysis/Air_Quality_Profile_Antwerpen.html`
+- `analysis/Air_Quality_Profile_Steenokkerzeel.html`
+- `analysis/Air_Quality_Profile_Vilvoorde.html`
+- `analysis/newplot.png`
+
+## Dimensional model
+
+The DBT project builds a dimensional model with the following tables:
+
+### Dimensions
+
+- `dim_pollutant`
+  - `phenomenon_id`
+  - `phenomenon_name`
+  - `pollutant_type`
+
+- `dim_station`
+  - `station_id`
+  - `station_name`
+  - `city_name`
+  - `latitude`
+  - `longitude`
+
+- `dim_time`
+  - `timestamp`
+  - `measured_at_timestamp`
+  - `measured_at_date`
+  - `hour`
+
+### Fact
+
+- `fact_air_quality`
+  - `measurement_id`
+  - `timestamp`
+  - `station_id`
+  - `phenomenon_id`
+  - `measurement_value`
+
+`fact_air_quality` is built by joining staged measurements with station metadata and pollutant definitions.
+
+## Consumption tables
+
+The DBT consumption layer provides business-focused outputs:
+
+- `consumption_city_avg`
+  - average pollution by city and pollutant type
+  - station-level averages and variance from city average
+
+- `consumption_city_hourly_pollution`
+  - hourly average pollution for each city, pollutant, date, and hour
+
+- `consumption_city_station_coverage`
+  - station coverage and monitoring availability by city and pollutant
+
+- `consumption_top10_polluting_cities`
+  - top 10 most polluted cities by average pollutant value
+
+- `consumption_city_nbr_station`
+  - pollution ranking combined with station counts
 
 ## Project structure
 
 - `ingestion/`
   - `api_client.py`: IRCELINE API client
-  - `config.py`: environment and pipeline configuration
+  - `config.py`: environment configuration and pipeline settings
   - `orchestration.py`: main ingestion flow
-  - `loaders/mysql_loader.py`: load DataFrames into MySQL
-  - `timeseries_meta.py`, `measurements.py`, `stations.py`, `phenomena.py`: extraction modules
+  - `loaders/mysql_loader.py`: utility for loading data into MySQL
+  - `stations.py`, `phenomena.py`, `timeseries_meta.py`, `measurements.py`: extractors for source data
   - `dags/ingestion_dag.py`: Airflow DAG definition
-- `air_quality_project/`: DBT project files, models, and compiled DAG assets
-- `analysis/`: notebook-based analysis and visualization
-- `.env`: local application secrets and database settings
+
+- `air_quality_project/`
+  - `dbt_project.yml`: DBT project configuration
+  - `profiles.yml`: DBT connection profiles
+  - `models/`
+    - `010_sources/`: source definitions for raw tables
+    - `020_staging/`: staging models for cleaned IRCELINE source data
+    - `030_intermediate/`: intermediate models
+    - `040_marts/`: dimension and fact models
+    - `050_consumption/`: business consumption models
+
+- `analysis/`
+  - `deep_analysis.ipynb`: exploratory notebook
+  - generated HTML reports and chart image files
+
+- `airflow_home/`
+  - Airflow runtime folder and scheduler logs
+
+- `logs/`
+  - pipeline and execution logs
 
 ## Prerequisites
 
 - Python 3.11 (recommended)
-- Windows PowerShell or WSL for easier Airflow support
 - MySQL server accessible from your machine
 - Git if cloning the repository
+
+## Logging
+
+The ingestion pipeline uses Python's built-in logging module for monitoring and debugging.
+
+- Logs are configured at INFO level by default in `orchestration.py`
+- Change to DEBUG for more detailed output: `logging.basicConfig(level=logging.DEBUG, ...)`
+- Logs include timestamps, module names, levels, and messages
 
 ## Setup
 
 ### 1. Create and activate a virtual environment
 
 ```powershell
-cd "c:\Users\pc\Documents\Myprojects\irceline\irceline_air_quality"
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip setuptools wheel
@@ -46,12 +160,6 @@ python -m pip install --upgrade pip setuptools wheel
 
 ```powershell
 python -m pip install -r requirements.txt
-```
-
-If you plan to use notebooks or VS Code notebook rendering, also install:
-
-```powershell
-python -m pip install --upgrade notebook nbformat ipykernel
 ```
 
 ### 3. Configure environment variables
@@ -73,18 +181,11 @@ MARTHOUSE_DATABASE=air_quality_db_mart
 
 ### Direct execution
 
-Run the ingestion script directly from the repo root:
-
 ```powershell
 python ingestion\orchestration.py
 ```
 
-This currently executes the station ingestion flow and writes results to the configured MySQL database.
-
-### What it loads
-
-- `raw_stations`: pulled from `fetch_stations()`
-- The rest of the pipeline (`phenomena`, `timeseries`, `measurements`) is present in code but currently commented out for incremental testing.
+This executes the ingestion flow and writes results into the configured MySQL database.
 
 ## Airflow orchestration
 
@@ -96,14 +197,10 @@ The repository includes an Airflow DAG at `ingestion/dags/ingestion_dag.py`.
 python -m pip install "apache-airflow==2.8.1" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.11.txt"
 ```
 
-> On Windows, Airflow may be easier to run in WSL if you encounter package or scheduler issues.
-
 ### Configure Airflow
 
-Set the Airflow home path and copy the DAG:
-
 ```powershell
-$env:AIRFLOW_HOME = "c:\Users\pc\Documents\Myprojects\irceline\irceline_air_quality\airflow_home"
+$env:AIRFLOW_HOME = "\airflow_home"
 md $env:AIRFLOW_HOME\dags
 copy .\ingestion\dags\ingestion_dag.py $env:AIRFLOW_HOME\dags\
 ```
@@ -123,8 +220,6 @@ airflow users create --username admin --firstname Admin --lastname User --role A
 
 ### Start Airflow
 
-Run the webserver in one terminal and the scheduler in another:
-
 ```powershell
 airflow webserver --port 8080
 airflow scheduler
@@ -138,23 +233,25 @@ http://localhost:8080
 
 ### Trigger the DAG
 
-Manual trigger:
-
 ```powershell
 airflow dags trigger irceline_ingestion
 ```
 
-Trigger with a custom timespan:
+Manual trigger with a custom timespan:
 
 ```powershell
 airflow dags trigger -c "{\"timespan\":\"2026-04-14T00:00:00Z/2026-04-15T00:00:00Z\"}" irceline_ingestion
 ```
 
-### DAG behavior
+## DBT project
 
-- Default schedule: `@daily`
-- If no `timespan` is passed, it uses the current UTC date from midnight to midnight
-- If `timespan` is provided in DAG config, it uses that value
+From `air_quality_project/`:
+
+```powershell
+cd air_quality_project
+dbt deps
+dbt run
+```
 
 ## Analysis
 
@@ -164,41 +261,16 @@ Open the notebook for interactive analysis:
 code analysis\deep_analysis.ipynb
 ```
 
-The `analysis/deep_analysis.ipynb` notebook connects to MySQL and visualizes the mart tables.
-
-### Notebook environment
-
-Make sure the venv is active and that `nbformat`, `notebook`, and `ipykernel` are installed.
-
-## Optional: DBT project
-
-The `air_quality_project/` folder contains a DBT project for model development and marts.
-
-If you have DBT installed, run:
-
-```powershell
-dbt deps
-cd air_quality_project
-dbt run
-```
-
 ## Troubleshooting
 
-### Common issues
-
-- `AirflowConfigException: Cannot use relative path`: set `AIRFLOW__CORE__SQL_ALCHEMY_CONN` to an absolute `sqlite:////...` URI
-- `nbformat` rendering errors in notebooks: install `nbformat` and `notebook`
-- `df.to_sql` MySQL errors: ensure `pymysql` and `SQLAlchemy` are installed and `.env` is configured correctly
-
-### Environment notes
-
-- Always run Python commands from the activated `.venv`
-- Keep `.env` secrets local and never commit them
+- Use activated `.venv` for Python commands
+- Keep `.env` secrets local
+- Ensure MySQL is reachable and credentials are valid
 
 ## Next steps
 
 1. Validate MySQL connectivity
 2. Run ingestion directly
-3. Start Airflow and confirm DAG discovery
-4. Use the notebook to validate mart data
-5. Optionally expand the ingestion pipeline by enabling `phenomena`, `timeseries`, and `measurements`
+3. Confirm Airflow DAG discovery
+4. Use the notebook to validate mart and consumption outputs
+5. Expand ingestion to cover all source tables

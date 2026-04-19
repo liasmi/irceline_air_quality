@@ -1,9 +1,12 @@
 import os
+import logging
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
 from typing import List
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class APIConfig:
@@ -43,3 +46,5 @@ class PipelineConfig:
 api_config = APIConfig()
 mysql_config = MySQLConfig()
 pipeline_config = PipelineConfig()
+
+logger.info("Configuration loaded successfully")
