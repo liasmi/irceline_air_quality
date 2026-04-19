@@ -47,6 +47,12 @@ The notebook `analysis/deep_analysis.ipynb` was used to explore air quality data
 - `analysis/Air_Quality_Profile_Vilvoorde.html`
 - `analysis/newplot.png`
 
+E.g: Top 10 Most Polluting cities
+<img width="1135" height="528" alt="image" src="https://github.com/user-attachments/assets/de486660-016c-4ef1-8312-4a6b238f78db" />
+<img width="1152" height="539" alt="image" src="https://github.com/user-attachments/assets/94f5641b-6a37-4376-90a4-3522bd7a9e7a" />
+
+
+
 ## Dimensional model
 
 The DBT project builds a dimensional model with the following tables:
