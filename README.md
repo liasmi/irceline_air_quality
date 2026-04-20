@@ -29,7 +29,7 @@ API documentation:
 
 ## What was analyzed
 
-The notebook `analysis/deep_analysis.ipynb` was used to explore air quality data and generate chart artifacts for:
+The notebook `analysis/station_polution_analysis.ipynb` was used to explore air quality data and generate chart artifacts for:
 - station coverage and monitoring distribution
 - polluted city ranking in Flanders
 - hourly pollution profiles for Antwerpen and Steenokkerzeel
