@@ -1,15 +1,30 @@
-import requests
+"""Phenomena data extraction module for IRCELINE air quality pollutants.
+
+This module provides functionality to fetch and process pollutant/phenomenon
+definitions from the IRCELINE API, including pollutant types and identifiers.
+"""
+
 import pandas as pd
 import logging
+from ingestion.api_client import IRCELINEClient
 
 logger = logging.getLogger(__name__)
 
-URL = "https://geo.irceline.be/sos/api/v1/phenomena"
-
 
 def fetch_phenomena():
+    """Fetch and process pollutant phenomena data from IRCELINE API.
+
+    Retrieves all available pollutant/phenomenon definitions with their
+    identifiers and labels, then transforms into a clean pandas DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - phenomenon_id: Unique phenomenon identifier
+            - label: Human-readable phenomenon name
+    """
     logger.info("Fetching phenomena from API")
-    data = requests.get(URL).json()
+    client = IRCELINEClient()
+    data = client.get_phenomena()
 
     records = []
 
