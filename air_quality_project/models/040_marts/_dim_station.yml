@@ -1,0 +1,4 @@
+version: 2 
+models:
+  - name: dim_station
+    description: "Dimension table containing information about air quality monitoring stations"

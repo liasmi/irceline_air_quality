@@ -1,0 +1,4 @@
+version: 2
+models:
+  - name: dim_pollutant
+    description: "Dimension table for pollutants/phenomena being measured"

@@ -1,0 +1,4 @@
+version: 2
+models:
+  - name: dim_time
+    description: "Dimension table for time-related information"
